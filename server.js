@@ -4,18 +4,30 @@ const app = express();
 
 app.use(express.json());
 
+app.get('/', (req, res) => {
+  res.send('Server is running!');
+});
+
 app.get('/ebay/account-deletion', (req, res) => {
+  console.log('GET /ebay/account-deletion called');
   const challengeCode = req.query.challenge_code;
+  
   if (!challengeCode) {
-    return res.status(200).send('Endpoint is running!');
+    return res.status(200).json({ status: 'endpoint is active' });
   }
-  const verificationToken = process.env.EBAY_VERIFICATION_TOKEN || 'ebayVerifyToken20240305AbCdEfGhIjKlMnOpQrSt';
-  const endpoint = process.env.EBAY_ENDPOINT_URL || 'https://ebay-deletion-endpoint-9x2.onrender.com/ebay/account-deletion';
+
+  const verificationToken = process.env.EBAY_VERIFICATION_TOKEN;
+  const endpoint = process.env.EBAY_ENDPOINT_URL;
+
+  console.log('Token:', verificationToken);
+  console.log('Endpoint:', endpoint);
+
   const hash = crypto.createHash('sha256');
   hash.update(challengeCode);
   hash.update(verificationToken);
   hash.update(endpoint);
   const challengeResponse = hash.digest('hex');
+
   return res.status(200).json({ challengeResponse });
 });
 
